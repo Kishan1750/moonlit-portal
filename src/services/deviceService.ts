@@ -10,7 +10,8 @@ import {
   deleteDoc,
   doc,
   updateDoc,
-  serverTimestamp
+  serverTimestamp,
+  DocumentData
 } from "firebase/firestore";
 import { toast } from "sonner";
 
@@ -50,11 +51,18 @@ export const getDevices = async (userId: string, roomId?: string): Promise<Devic
     
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate() || new Date()
-    } as Device));
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name,
+        icon: data.icon,
+        roomId: data.roomId,
+        userId: data.userId,
+        isOn: data.isOn,
+        createdAt: data.createdAt?.toDate() || new Date()
+      } as Device;
+    });
   } catch (error: any) {
     toast.error(`Failed to fetch devices: ${error.message}`);
     return [];
